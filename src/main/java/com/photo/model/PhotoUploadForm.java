@@ -20,4 +20,5 @@ public class PhotoUploadForm {
     @RestForm
     @NotNull
     public String sourceType;
+    String checksum;
 }

@@ -1,12 +1,12 @@
 package com.photo.model;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
+import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Entity
 @Getter
@@ -15,14 +15,15 @@ import java.util.UUID;
 @NoArgsConstructor
 @ToString
 @Table(name = "photos")
-public class Photo extends PanacheEntityBase {
+public class Photo extends PanacheEntity {
 
-    private UUID id;
+    @Id
+    private long id;
     private String name;
     private String mimeType;
     private LocalDateTime createdAt;
     private String storagePath;
-    private long sizeMB;
+    private String sizeMB;
     private String checksum;
 
 }

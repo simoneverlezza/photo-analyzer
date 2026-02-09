@@ -3,35 +3,38 @@ package com.photo.service;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.Metadata;
+import com.drew.metadata.exif.ExifSubIFDDirectory;
+import com.photo.mapper.PhotoEntityMapper;
 import com.photo.model.Photo;
 import com.photo.model.PhotoUploadForm;
+import com.photo.repository.PhotoRepository;
+import com.photo.utils.MetadataUtils;
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
-import org.apache.tika.Tika;
+import jakarta.inject.Inject;
 
-import java.io.File;
-import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 @ApplicationScoped
 public class PhotoService {
+    @Inject
+    PhotoRepository photoRepository;
 
-    static final Tika tika = new Tika();
-
-    public void analyzePhoto(PhotoUploadForm uploadedPhoto, String tempPath) {
-        Metadata metadata = extractMetadata(uploadedPhoto.getFile());
-
-    }
-    private Metadata extractMetadata(File photo) {
-        try {
-            return ImageMetadataReader.readMetadata(photo);
-        } catch (Exception e) {
-            Log.infof("Error extracting metadata from %s ... setting it to null value. Error: %s",
-                    photo.getName(), e.getMessage());
-            return null;
-        }
+    public String analyzeAndPersistPhoto(PhotoUploadForm uploadedPhoto, String tempPath) {
+        Log.infof("Starting photo analysis");
+        Map<String, String> metadata = MetadataUtils.extractMetadata(uploadedPhoto.getFile());
+        Photo photo = PhotoEntityMapper.toPhotoEntity(metadata, uploadedPhoto.getChecksum());
+        Log.infof("Analysis ended, persisting photo");
+        return persist(photo);
     }
 
-    private void persist(Photo photo, String tempPath) {
+    private String persist(Photo photo) {
+        return photoRepository.saveToDB(photo);
+    }
 
+    private List<Photo> getAllPhotos() {
+        Log.infof("Getting all photos");
+        return photoRepository.getAllPhotos();
     }
 }
