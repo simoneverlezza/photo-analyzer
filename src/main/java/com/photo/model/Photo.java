@@ -17,8 +17,6 @@ import java.time.LocalDateTime;
 @Table(name = "photos")
 public class Photo extends PanacheEntity {
 
-    @Id
-    private long id;
     private String name;
     private String mimeType;
     private LocalDateTime createdAt;
