@@ -1,8 +1,15 @@
 package photo;
 
+import com.photo.AppConfig;
+import com.sv.filter.StackTraceFilter;
+import jakarta.inject.Inject;
+
 import java.io.File;
 
 public class CommonTestResource {
+
+    @Inject
+    AppConfig config;
 
     protected static final String LOVELESS_JPG = "loveless.JPG";
     protected static final String SCREENSHOT_PNG = "screenshot.png";
@@ -16,7 +23,8 @@ public class CommonTestResource {
 
             return new File(url.toURI());
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(StackTraceFilter
+                    .filterStackTrace(config.baseProjectPackage(), e));
         }
     }
 }

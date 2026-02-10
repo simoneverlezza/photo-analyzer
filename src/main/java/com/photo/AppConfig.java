@@ -2,7 +2,6 @@ package com.photo;
 
 import io.smallrye.config.ConfigMapping;
 import io.smallrye.config.WithDefault;
-import lombok.With;
 
 @ConfigMapping(prefix = "app")
 public interface AppConfig {
@@ -12,4 +11,6 @@ public interface AppConfig {
     String photoTestDir();
     @WithDefault("/data/photos")
     String photosSystemDir();
+    @WithDefault("com.photo")
+    String baseProjectPackage();
 }

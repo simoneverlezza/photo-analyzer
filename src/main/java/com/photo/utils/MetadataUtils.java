@@ -3,6 +3,7 @@ package com.photo.utils;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.exif.ExifSubIFDDirectory;
+import com.photo.model.MetadataErrors;
 import com.photo.model.MetadataSelection;
 import io.quarkus.logging.Log;
 
@@ -16,6 +17,7 @@ public class MetadataUtils {
     public static Map<String, String> extractMetadata(File photo) {
         try {
             Metadata metadata = ImageMetadataReader.readMetadata(photo);
+            Log.infof(metadata.toString());
             ExifSubIFDDirectory directory = metadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
             return filterMetadata(directory);
         } catch (Exception e) {
@@ -27,7 +29,15 @@ public class MetadataUtils {
 
     public static Map<String, String> filterMetadata(ExifSubIFDDirectory metadata) {
         Map<String, String> result = new HashMap<>();
-        result.put(MetadataSelection.CREATION_DATE.getValue(), LocalDateTime.parse(metadata.getDateOriginal().toString()).toString());
+
+        if(metadata.getDateOriginal() != null) {
+            result.put(MetadataSelection.CREATION_DATE.getValue(),
+                    LocalDateTime.parse(metadata.getDateOriginal().toString()).toString());
+        } else {
+            result.put(MetadataSelection.CREATION_DATE.getValue(),
+                    MetadataErrors.NO_CREATION_DATE.name());
+        }
+
         metadata.getTags().forEach(tag -> {
 
             if(tag.getTagName().equals(MetadataSelection.FILE_NAME.getValue())) {

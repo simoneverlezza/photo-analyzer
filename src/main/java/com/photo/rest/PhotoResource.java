@@ -7,6 +7,7 @@ import com.photo.model.PhotoUploadForm;
 import com.photo.response.PhotoResponse;
 import com.photo.service.PhotoService;
 import com.photo.utils.FileUtils;
+import com.sv.filter.StackTraceFilter;
 import io.quarkus.logging.Log;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
@@ -43,7 +44,7 @@ public class PhotoResource {
             tempPath = config.downloadDir();
         } catch (Exception e) {
             Log.infof("Error extracting uploaded file: %s - %s", file, e.getMessage());
-            throw new RuntimeException(e);
+            throw new RuntimeException(StackTraceFilter.filterStackTrace(config.baseProjectPackage(), e));
         }
 
         String message = photoService.analyzeAndPersistPhoto(uploadedPhoto, tempPath);
