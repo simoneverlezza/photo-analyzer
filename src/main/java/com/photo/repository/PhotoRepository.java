@@ -61,7 +61,7 @@ public class PhotoRepository implements PanacheRepository<Photo> {
             PhotoUpdater.updatePhoto(oldPhoto, newPhoto);
             return Outcome.SUCCESS;
         } catch (Exception e) {
-            Log.infof("Error updating photo with id %s - %s", oldPhoto.getId(), e.getMessage());
+            Log.infof("Error updating photo with id %s - %s", oldPhoto.id, e.getMessage());
         }
 
         return Outcome.FAILURE;
