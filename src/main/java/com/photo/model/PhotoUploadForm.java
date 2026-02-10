@@ -16,9 +16,9 @@ public class PhotoUploadForm {
 
     @RestForm("file")
     @NotNull
-    public File file;
+    private File file;
     @RestForm
     @NotNull
-    public String sourceType;
+    private String sourceType;
     String checksum;
 }
