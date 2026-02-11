@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,30 +27,37 @@ public class PhotoService {
     @Inject
     AppConfig config;
 
-    public String analyzeAndPersistPhoto(PhotoUploadForm uploadedPhoto, String tempPath) {
+    public Map<Outcome, String> analyzeAndPersistPhotos(List<PhotoUploadForm> rawPhotoData, String tempPath) {
         Log.infof("Starting photo analysis");
-        Map<String, String> metadata = MetadataUtils.extractMetadata(uploadedPhoto.getFile());
-        Photo photo = PhotoEntityMapper.toPhotoEntity(metadata, uploadedPhoto.getChecksum());
+
+        Map<Photo, File> photoFiles = new HashMap<>();
+
+        rawPhotoData.stream().forEach(uploadedPhoto -> {
+            Map<String, String> metadata = MetadataUtils.extractMetadata(uploadedPhoto.getFile());
+            photoFiles.put(PhotoEntityMapper.toPhotoEntity(metadata, uploadedPhoto.getChecksum()), uploadedPhoto.getFile());
+        });
+
         Log.infof("Analysis ended, persisting photo");
-        return persist(photo, uploadedPhoto.getFile());
+        return persist(photoFiles);
     }
 
-    private String persist(Photo photo, File actualFile) {
+    private Map<Outcome, String> persist(Map<Photo, File> photoFiles) {
         Log.infof("Persisting photo");
-        try {
-            Files.move(actualFile.toPath(), Paths.get(config.photosSystemDir()), StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException e) {
-            Log.infof("Error moving %s to %s - %s", actualFile.getName(), config.photosSystemDir(), e.getMessage());
-            return "Error moving " + actualFile.getName() + " to storage path. Metadata won't be persisted";
-        }
 
-        Outcome outcome = photoRepository.saveToDB(photo);
+        Map<Outcome, String> outcomes = new HashMap<>();
 
-        if(outcome.equals(Outcome.SUCCESS)) {
-            return photo.getName() + " saved successfully";
-        } else {
-            return photo.getName() + " not saved";
-        }
+        photoFiles.forEach((photo, file) -> {
+            try {
+                Files.move(file.toPath(), Paths.get(config.photosSystemDir()), StandardCopyOption.REPLACE_EXISTING);
+                photoRepository.saveToDB(photo);
+                outcomes.put(Outcome.SUCCESS, file.toString());
+            } catch (IOException e) {
+                Log.infof("Error moving %s to %s - %s", file.getName(), config.photosSystemDir(), e.getMessage());
+                outcomes.put(Outcome.FAILURE, file.toString());
+            }
+        });
+
+        return outcomes;
     }
 
     public List<Photo> getAllPhotos() {

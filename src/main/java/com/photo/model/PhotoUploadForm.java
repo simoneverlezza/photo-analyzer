@@ -13,7 +13,6 @@ import java.io.File;
 @NoArgsConstructor
 @ToString
 public class PhotoUploadForm {
-
     @RestForm("file")
     @NotNull
     private File file;

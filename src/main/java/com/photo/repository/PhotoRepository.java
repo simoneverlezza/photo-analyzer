@@ -24,6 +24,17 @@ public class PhotoRepository implements PanacheRepository<Photo> {
         }
     }
 
+    @Transactional
+    public Outcome saveBatchToDB(List<Photo> photos) {
+        try {
+            persist(photos);
+            return Outcome.SUCCESS;
+        } catch (Exception e) {
+            Log.infof("Error saving photos metadata to DB: %s", e.getMessage());
+            return Outcome.FAILURE;
+        }
+    }
+
     public List<Photo> getAllPhotos() {
         try {
             listAll();

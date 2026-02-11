@@ -30,6 +30,8 @@ public class MetadataUtils {
     public static Map<String, String> filterMetadata(ExifSubIFDDirectory metadata) {
         Map<String, String> result = new HashMap<>();
 
+        metadata.getTags().forEach(tag -> Log.infof("%s - %s", tag.getTagName(), tag.getDescription()));
+
         if(metadata.getDateOriginal() != null) {
             result.put(MetadataSelection.CREATION_DATE.getValue(),
                     LocalDateTime.parse(metadata.getDateOriginal().toString()).toString());
