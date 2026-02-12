@@ -1,22 +1,28 @@
 package com.photo.rest;
 
 import com.photo.AppConfig;
+import com.photo.model.ArchiveFormats;
 import com.photo.model.Outcome;
 import com.photo.model.Photo;
 import com.photo.model.PhotoUploadForm;
 import com.photo.response.PhotoResponse;
 import com.photo.service.PhotoService;
+import com.photo.utils.ArchiveExtractor;
 import com.photo.utils.FileUtils;
+import com.photo.utils.PhotoUtils;
 import com.sv.filter.StackTraceFilter;
 import io.quarkus.logging.Log;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.apache.tika.Tika;
 import org.jboss.resteasy.reactive.RestForm;
 import org.jboss.resteasy.reactive.multipart.FileUpload;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -27,6 +33,7 @@ public class PhotoResource {
     AppConfig config;
     @Inject
     PhotoService photoService;
+    Tika tika = new Tika();
 
     @POST
     @Path("/upload")
@@ -35,32 +42,16 @@ public class PhotoResource {
 
         Log.infof("Received upload photo request");
 
-        PhotoUploadForm uploadedPhoto = null;
         String tempPath = config.downloadDir();
-        Map<Outcome, String> outcomes = null;
-        List<String> notPersistedPhotos = null;
 
-        List<PhotoUploadForm> rawPhotoData = new ArrayList<>();
+        List<PhotoUploadForm> uploadedPhotos = FileUtils.getRawData(files, tika, tempPath, sourceType);
 
-        for(FileUpload file : files) {
+        Map<Outcome, String> outcomes = photoService.analyzeAndPersistPhotos(uploadedPhotos, tempPath);
 
-            File uploadedFile = file.uploadedFile().toFile();
-
-            try {
-                uploadedPhoto = new PhotoUploadForm(uploadedFile, sourceType, FileUtils.calculateChecksum(uploadedFile));
-                rawPhotoData.add(uploadedPhoto);
-            } catch (Exception e) {
-                Log.infof("Error extracting uploaded file: %s - %s", file, e.getMessage());
-                throw new RuntimeException(StackTraceFilter.filterStackTrace(config.baseProjectPackage(), e));
-            }
-
-            outcomes = photoService.analyzeAndPersistPhotos(rawPhotoData, tempPath);
-        }
-
-        notPersistedPhotos = outcomes.entrySet().stream()
+        List<String> notPersistedPhotos = outcomes.entrySet().stream()
                 .filter(entry -> entry.getKey().equals(Outcome.FAILURE))
                 .map(Map.Entry::getValue)
-                .collect(Collectors.toList());
+                .toList();
 
         if(notPersistedPhotos.size() > 0) {
             return Response.ok().entity("Le seguenti foto non sono state salvate: " +
