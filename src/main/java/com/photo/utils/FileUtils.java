@@ -4,7 +4,6 @@ import com.photo.model.ArchiveFormats;
 import com.photo.model.ExtractedFile;
 import com.photo.model.PhotoUploadForm;
 import io.quarkus.logging.Log;
-import org.apache.tika.Tika;
 import org.jboss.resteasy.reactive.multipart.FileUpload;
 
 import java.io.File;
@@ -17,7 +16,7 @@ import java.util.List;
 
 public class FileUtils {
 
-    public static List<PhotoUploadForm> getRawData(List<FileUpload> files, Tika tika, String tempPath, String sourceType) {
+    public static List<PhotoUploadForm> getRawData(List<FileUpload> files, String tempPath, String sourceType) {
         List<PhotoUploadForm> uploadedPhotos = new ArrayList<>();
 
         for(FileUpload file : files) {

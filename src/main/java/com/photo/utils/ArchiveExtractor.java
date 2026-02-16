@@ -15,9 +15,6 @@ import java.util.List;
 
 public class ArchiveExtractor {
 
-    @Inject
-    static Tika tika;
-
     public static List<ExtractedFile> extract(Path archive, Path destination) throws Exception {
 
         List<ExtractedFile> extractedFiles = new ArrayList<>();

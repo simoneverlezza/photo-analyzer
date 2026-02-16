@@ -1,30 +1,22 @@
 package com.photo.rest;
 
 import com.photo.AppConfig;
-import com.photo.model.ArchiveFormats;
 import com.photo.model.Outcome;
 import com.photo.model.Photo;
 import com.photo.model.PhotoUploadForm;
 import com.photo.response.PhotoResponse;
 import com.photo.service.PhotoService;
-import com.photo.utils.ArchiveExtractor;
 import com.photo.utils.FileUtils;
-import com.photo.utils.PhotoUtils;
-import com.sv.filter.StackTraceFilter;
 import io.quarkus.logging.Log;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.apache.tika.Tika;
 import org.jboss.resteasy.reactive.RestForm;
 import org.jboss.resteasy.reactive.multipart.FileUpload;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 @Path("/photos")
@@ -33,7 +25,6 @@ public class PhotoResource {
     AppConfig config;
     @Inject
     PhotoService photoService;
-    Tika tika = new Tika();
 
     @POST
     @Path("/upload")
@@ -44,7 +35,7 @@ public class PhotoResource {
 
         String tempPath = config.downloadDir();
 
-        List<PhotoUploadForm> uploadedPhotos = FileUtils.getRawData(files, tika, tempPath, sourceType);
+        List<PhotoUploadForm> uploadedPhotos = FileUtils.getRawData(files, tempPath, sourceType);
 
         Map<Outcome, String> outcomes = photoService.analyzeAndPersistPhotos(uploadedPhotos, tempPath);
 
