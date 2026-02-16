@@ -12,4 +12,6 @@ import java.io.File;
 public class ExtractedFile {
     private File file;
     private String mimeType;
+    private String fileName;
+    private String size;
 }

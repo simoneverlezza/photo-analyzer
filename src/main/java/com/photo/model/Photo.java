@@ -5,8 +5,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.*;
 
-import java.time.LocalDateTime;
-
 @Entity
 @Getter
 @Setter
@@ -18,8 +16,8 @@ public class Photo extends PanacheEntity {
 
     private String name;
     private String mimeType;
-    private LocalDateTime createdAt;
-    private LocalDateTime uploadedAt;
+    private String createdAt;
+    private String uploadedAt;
     private String storagePath;
     private String sizeMB;
     private String checksum;

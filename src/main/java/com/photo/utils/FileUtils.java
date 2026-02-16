@@ -23,13 +23,13 @@ public class FileUtils {
         for(FileUpload file : files) {
 
             File uploadedFile = file.uploadedFile().toFile();
-            String mimeType;
+            String fileName = file.fileName();
+            String mimeType = file.contentType();
+            String size = String.valueOf(file.size());
 
-            Log.infof("Extracted %s", uploadedFile.getName());
+            Log.infof("Extracted %s", uploadedFile.toString());
 
             try {
-
-                mimeType = tika.detect(uploadedFile);
 
                 Log.infof("Detected mime type: %s", mimeType);
 
@@ -44,8 +44,12 @@ public class FileUtils {
                         PhotoUploadForm rawData = PhotoUtils.uploadedPhotoCreator(
                                 extractedFile.getFile(),
                                 sourceType,
+                                extractedFile.getFileName(),
+                                extractedFile.getMimeType(),
+                                extractedFile.getSize(),
                                 FileUtils.calculateChecksum(extractedFile.getFile()),
-                                extractedFile.getMimeType());
+                                null,
+                                null);
 
                         Log.infof("Extracted raw data: %s", rawData.toString());
 
@@ -54,7 +58,7 @@ public class FileUtils {
                 }
 
                 PhotoUploadForm rawData = PhotoUtils.uploadedPhotoCreator(
-                        uploadedFile, sourceType, FileUtils.calculateChecksum(uploadedFile), mimeType);
+                        uploadedFile, sourceType, fileName, mimeType, size, FileUtils.calculateChecksum(uploadedFile), null, null);
 
                 Log.infof("Extracted raw data: %s", rawData.toString());
 

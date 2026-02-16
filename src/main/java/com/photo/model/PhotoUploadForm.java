@@ -19,6 +19,10 @@ public class PhotoUploadForm {
     @RestForm
     @NotNull
     private String sourceType;
+    private String name;
     private String mimeType;
-    String checksum;
+    private String size;
+    private String checksum;
+    private String createdAt;
+    private String uploadedAt;
 }

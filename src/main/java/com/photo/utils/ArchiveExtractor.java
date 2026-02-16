@@ -5,6 +5,7 @@ import io.quarkus.logging.Log;
 import jakarta.inject.Inject;
 import org.apache.commons.compress.archivers.*;
 import org.apache.commons.compress.compressors.*;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.tika.Tika;
 
 import java.io.*;
@@ -53,9 +54,11 @@ public class ArchiveExtractor {
                             archiveStream.transferTo(o);
 
                             File extractedFile = outputPath.toFile();
-                            String mimeType = tika.detect(extractedFile);
+                            String name = extractedFile.getName();
+                            String mimeType = Files.probeContentType(extractedFile.toPath());
+                            String size = String.valueOf(extractedFile.length());
 
-                            extractedFiles.add(new ExtractedFile(extractedFile, mimeType));
+                            extractedFiles.add(new ExtractedFile(extractedFile, mimeType, name, size));
 
                             Log.infof("Extracted file %s", extractedFile);
 
