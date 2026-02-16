@@ -19,5 +19,6 @@ public class PhotoUploadForm {
     @RestForm
     @NotNull
     private String sourceType;
+    private String mimeType;
     String checksum;
 }

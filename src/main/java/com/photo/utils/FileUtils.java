@@ -1,6 +1,7 @@
 package com.photo.utils;
 
 import com.photo.model.ArchiveFormats;
+import com.photo.model.ExtractedFile;
 import com.photo.model.PhotoUploadForm;
 import io.quarkus.logging.Log;
 import org.apache.tika.Tika;
@@ -37,13 +38,14 @@ public class FileUtils {
 
                     Log.infof("File is an archive");
 
-                    List<File> archiveFiles = ArchiveExtractor.extract(file.filePath(), Paths.get(tempPath));
-                    archiveFiles.stream().forEach(archiveFile -> {
+                    List<ExtractedFile> extractedFiles = ArchiveExtractor.extract(file.filePath(), Paths.get(tempPath));
+                    extractedFiles.stream().forEach(extractedFile -> {
 
                         PhotoUploadForm rawData = PhotoUtils.uploadedPhotoCreator(
-                                archiveFile,
+                                extractedFile.getFile(),
                                 sourceType,
-                                FileUtils.calculateChecksum(archiveFile));
+                                FileUtils.calculateChecksum(extractedFile.getFile()),
+                                extractedFile.getMimeType());
 
                         Log.infof("Extracted raw data: %s", rawData.toString());
 
@@ -51,7 +53,8 @@ public class FileUtils {
                     });
                 }
 
-                PhotoUploadForm rawData = PhotoUtils.uploadedPhotoCreator(uploadedFile, sourceType, FileUtils.calculateChecksum(uploadedFile));
+                PhotoUploadForm rawData = PhotoUtils.uploadedPhotoCreator(
+                        uploadedFile, sourceType, FileUtils.calculateChecksum(uploadedFile), mimeType);
 
                 Log.infof("Extracted raw data: %s", rawData.toString());
 

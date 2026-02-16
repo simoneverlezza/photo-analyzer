@@ -4,7 +4,8 @@ public enum MetadataSelection {
     FILE_NAME("File Name"),
     FILE_SIZE("File Size"),
     DETECTED_MIME_TYPE("Detected MIME Type"),
-    CREATION_DATE("Creation Date");
+    CREATION_DATE("Creation Date"),
+    UPLOAD_DATE("Upload Date");
 
     private final String value;
 

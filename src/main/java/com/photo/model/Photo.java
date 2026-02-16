@@ -19,6 +19,7 @@ public class Photo extends PanacheEntity {
     private String name;
     private String mimeType;
     private LocalDateTime createdAt;
+    private LocalDateTime uploadedAt;
     private String storagePath;
     private String sizeMB;
     private String checksum;

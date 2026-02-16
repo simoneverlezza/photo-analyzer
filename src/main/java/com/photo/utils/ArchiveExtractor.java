@@ -1,11 +1,12 @@
 package com.photo.utils;
 
-import com.photo.AppConfig;
-import com.sv.filter.StackTraceFilter;
+import com.photo.model.ExtractedFile;
 import io.quarkus.logging.Log;
 import jakarta.inject.Inject;
 import org.apache.commons.compress.archivers.*;
 import org.apache.commons.compress.compressors.*;
+import org.apache.tika.Tika;
+
 import java.io.*;
 import java.nio.file.*;
 import java.util.ArrayList;
@@ -13,9 +14,12 @@ import java.util.List;
 
 public class ArchiveExtractor {
 
-    public static List<File> extract(Path archive, Path destination) throws Exception {
+    @Inject
+    static Tika tika;
 
-        List<File> extractedFiles = new ArrayList<>();
+    public static List<ExtractedFile> extract(Path archive, Path destination) throws Exception {
+
+        List<ExtractedFile> extractedFiles = new ArrayList<>();
 
         try (InputStream fi = Files.newInputStream(archive); BufferedInputStream bi = new BufferedInputStream(fi)) {
 
@@ -49,8 +53,9 @@ public class ArchiveExtractor {
                             archiveStream.transferTo(o);
 
                             File extractedFile = outputPath.toFile();
+                            String mimeType = tika.detect(extractedFile);
 
-                            extractedFiles.add(extractedFile);
+                            extractedFiles.add(new ExtractedFile(extractedFile, mimeType));
 
                             Log.infof("Extracted file %s", extractedFile);
 

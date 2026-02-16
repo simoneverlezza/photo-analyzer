@@ -33,8 +33,8 @@ public class PhotoService {
         Map<Photo, File> photoFiles = new HashMap<>();
 
         rawPhotoData.stream().forEach(uploadedPhoto -> {
-            Map<String, String> metadata = MetadataUtils.extractMetadata(uploadedPhoto.getFile());
-            photoFiles.put(PhotoEntityMapper.toPhotoEntity(metadata, uploadedPhoto.getChecksum()), uploadedPhoto.getFile());
+            Map<String, String> metadata = MetadataUtils.extractMetadata(uploadedPhoto.getFile(), uploadedPhoto.getMimeType());
+            photoFiles.put(PhotoEntityMapper.toPhotoEntity(metadata, uploadedPhoto.getChecksum(), uploadedPhoto.getFile()), uploadedPhoto.getFile());
         });
 
         Log.infof("Analysis ended, persisting photo");
