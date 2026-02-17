@@ -20,6 +20,7 @@ public class PhotoEntityMapper {
 
         photo.setName(uploadedPhoto.getName());
         photo.setSizeMB(FileUtils.bytesToMB(Long.parseLong(uploadedPhoto.getSize())));
+        photo.setMimeType(uploadedPhoto.getMimeType());
         photo.setChecksum(uploadedPhoto.getChecksum());
         photo.setCreatedAt(uploadedPhoto.getCreatedAt());
         photo.setUploadedAt(String.valueOf(LocalDateTime.now()));

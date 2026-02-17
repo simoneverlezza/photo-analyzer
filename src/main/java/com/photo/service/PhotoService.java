@@ -14,6 +14,7 @@ import jakarta.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
@@ -35,7 +36,8 @@ public class PhotoService {
         Map<Photo, File> photoFiles = new HashMap<>();
 
         rawPhotoData.stream().forEach(uploadedPhoto -> {
-            MetadataUtils.extractCreatedAt(uploadedPhoto);
+            String createdAt = MetadataUtils.extractCreatedAt(uploadedPhoto);
+            uploadedPhoto.setCreatedAt(createdAt);
             photoFiles.put(photoEntityMapper.toPhotoEntity(uploadedPhoto), uploadedPhoto.getFile());
         });
 
@@ -49,12 +51,17 @@ public class PhotoService {
         Map<Outcome, String> outcomes = new HashMap<>();
 
         photoFiles.forEach((photo, file) -> {
+
+            Path targetPath = Paths.get(config.photosSystemDir()).toAbsolutePath().resolve(photo.getName());
+
+            Log.infof("About to move %s to %s", file.toPath(), targetPath);
+
             try {
-                Files.move(file.toPath(), Paths.get(config.photosSystemDir()), StandardCopyOption.REPLACE_EXISTING);
+                Files.move(file.toPath(), targetPath);
                 photoRepository.saveToDB(photo);
                 outcomes.put(Outcome.SUCCESS, file.toString());
             } catch (IOException e) {
-                Log.infof("Error moving %s to %s - %s", file.getName(), config.photosSystemDir(), e.getMessage());
+                Log.infof("Error moving %s to %s - %s", file.getName(), config.photosSystemDir(), e);
                 outcomes.put(Outcome.FAILURE, file.toString());
             }
         });

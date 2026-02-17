@@ -10,6 +10,7 @@ import org.apache.tika.sax.BodyContentHandler;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -20,37 +21,41 @@ import java.util.Optional;
 
 public class MetadataUtils {
 
-    @Inject
-    static Tika tika;
-
-    public static boolean extractCreatedAt(PhotoUploadForm uploadedPhoto) {
+    public static String extractCreatedAt(PhotoUploadForm uploadedPhoto) {
         try {
             return setCreatedAtDate(uploadedPhoto);
         } catch (Exception e) {
             Log.infof("Error extracting metadata from %s ... setting it to null value. Error: %s",
                     uploadedPhoto.getName(), e.getMessage());
-            return false;
+            return "";
         }
     }
 
-    private static boolean setCreatedAtDate(PhotoUploadForm photo) {
+    private static String setCreatedAtDate(PhotoUploadForm uploadedPhoto) {
 
-        try {
-            Optional<Instant> creationDate = extractCreationDate(new FileInputStream(photo.getFile()));
+        try (FileInputStream fis = new FileInputStream(uploadedPhoto.getFile())) {
 
-            String parsedCreationDate = String.valueOf(LocalDateTime.parse(creationDate.get().toString()));
+            Optional<Instant> creationDate = extractCreationDate(fis);
+            String parsedCreationDate = "";
 
-            photo.setCreatedAt(parsedCreationDate);
+            if(creationDate.isPresent()) {
+                parsedCreationDate = String.valueOf(LocalDateTime.parse(creationDate.get().toString()));
+            }
+
+            uploadedPhoto.setCreatedAt(parsedCreationDate);
 
             if(parsedCreationDate != null && !parsedCreationDate.isEmpty()) {
                 Log.infof("Creation Date found and added: %s", parsedCreationDate);
-                return true;
+                return parsedCreationDate;
             } else {
-                return false;
+                return "";
             }
 
         } catch (FileNotFoundException e) {
-            Log.errorf("File not found: %s", photo.getFile().getAbsolutePath());
+            Log.errorf("File not found: %s", uploadedPhoto.getFile().getAbsolutePath());
+            throw new RuntimeException(e);
+
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -78,6 +83,8 @@ public class MetadataUtils {
                     Optional<Instant> parsed = parseToInstant(value.trim());
                     if (parsed.isPresent()) {
                         return parsed;
+                    } else {
+                        Log.infof("Tried to extract creation date from %s but nothing found", field);
                     }
                 }
             }
