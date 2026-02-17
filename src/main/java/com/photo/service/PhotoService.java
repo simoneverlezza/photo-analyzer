@@ -57,9 +57,9 @@ public class PhotoService {
             Log.infof("About to move %s to %s", file.toPath(), targetPath);
 
             try {
-                Files.move(file.toPath(), targetPath);
-                photoRepository.saveToDB(photo);
-                outcomes.put(Outcome.SUCCESS, file.toString());
+                Files.move(file.toPath(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+                Outcome outcome = photoRepository.saveToDB(photo);
+                outcomes.put(outcome, file.toString());
             } catch (IOException e) {
                 Log.infof("Error moving %s to %s - %s", file.getName(), config.photosSystemDir(), e);
                 outcomes.put(Outcome.FAILURE, file.toString());

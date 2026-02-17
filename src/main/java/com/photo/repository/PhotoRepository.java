@@ -8,12 +8,11 @@ import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
-import javax.management.Query;
 import java.util.List;
 
 @ApplicationScoped
 public class PhotoRepository implements PanacheRepository<Photo> {
-
+    @Transactional
     public Outcome saveToDB(Photo photo) {
         try {
             persist(photo);
