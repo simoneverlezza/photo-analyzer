@@ -5,15 +5,17 @@ import com.photo.model.Photo;
 import com.photo.model.PhotoUploadForm;
 import com.photo.utils.FileUtils;
 import io.quarkus.logging.Log;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import java.time.LocalDateTime;
 
+@ApplicationScoped
 public class PhotoEntityMapper {
     @Inject
-    static AppConfig config;
+    AppConfig config;
 
-    public static Photo toPhotoEntity(PhotoUploadForm uploadedPhoto) {
+    public Photo toPhotoEntity(PhotoUploadForm uploadedPhoto) {
         Photo photo = new Photo();
 
         photo.setName(uploadedPhoto.getName());

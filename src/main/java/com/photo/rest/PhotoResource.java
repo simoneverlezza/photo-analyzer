@@ -37,6 +37,8 @@ public class PhotoResource {
 
         List<PhotoUploadForm> uploadedPhotos = FileUtils.getRawData(files, tempPath, sourceType);
 
+        Log.infof("Uploaded Photos: %s", Arrays.toString(uploadedPhotos.toArray()));
+
         Map<Outcome, String> outcomes = photoService.analyzeAndPersistPhotos(uploadedPhotos, tempPath);
 
         List<String> notPersistedPhotos = outcomes.entrySet().stream()

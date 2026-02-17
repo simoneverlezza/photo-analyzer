@@ -4,10 +4,12 @@ import com.photo.model.ArchiveFormats;
 import com.photo.model.ExtractedFile;
 import com.photo.model.PhotoUploadForm;
 import io.quarkus.logging.Log;
+import org.apache.tika.Tika;
 import org.jboss.resteasy.reactive.multipart.FileUpload;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.util.ArrayList;
@@ -16,6 +18,8 @@ import java.util.List;
 
 public class FileUtils {
 
+    static Tika tika = new Tika();
+
     public static List<PhotoUploadForm> getRawData(List<FileUpload> files, String tempPath, String sourceType) {
         List<PhotoUploadForm> uploadedPhotos = new ArrayList<>();
 
@@ -23,8 +27,13 @@ public class FileUtils {
 
             File uploadedFile = file.uploadedFile().toFile();
             String fileName = file.fileName();
-            String mimeType = file.contentType();
-            String size = String.valueOf(file.size());
+            String size = String.valueOf(uploadedFile.length());
+            String mimeType = "";
+            try {
+                mimeType = tika.detect(uploadedFile);
+            } catch (IOException e) {
+                Log.errorf("Cannot detect mime type of %s", uploadedFile.getAbsolutePath());
+            }
 
             Log.infof("Extracted %s", uploadedFile.toString());
 
@@ -32,8 +41,10 @@ public class FileUtils {
 
                 Log.infof("Detected mime type: %s", mimeType);
 
+                final String lambdaMimeType = mimeType;
+
                 // Se il file è un archivio
-                if (Arrays.stream(ArchiveFormats.values()).anyMatch(archiveType -> archiveType.getMimeType().equals(mimeType))) {
+                if (Arrays.stream(ArchiveFormats.values()).anyMatch(archiveType -> archiveType.getMimeType().equals(lambdaMimeType))) {
 
                     Log.infof("File is an archive");
 

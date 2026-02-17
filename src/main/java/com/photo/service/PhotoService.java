@@ -25,6 +25,8 @@ public class PhotoService {
     @Inject
     PhotoRepository photoRepository;
     @Inject
+    PhotoEntityMapper photoEntityMapper;
+    @Inject
     AppConfig config;
 
     public Map<Outcome, String> analyzeAndPersistPhotos(List<PhotoUploadForm> rawPhotoData, String tempPath) {
@@ -34,7 +36,7 @@ public class PhotoService {
 
         rawPhotoData.stream().forEach(uploadedPhoto -> {
             MetadataUtils.extractCreatedAt(uploadedPhoto);
-            photoFiles.put(PhotoEntityMapper.toPhotoEntity(uploadedPhoto), uploadedPhoto.getFile());
+            photoFiles.put(photoEntityMapper.toPhotoEntity(uploadedPhoto), uploadedPhoto.getFile());
         });
 
         Log.infof("Analysis ended, persisting photo");
